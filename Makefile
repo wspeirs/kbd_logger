@@ -1,5 +1,4 @@
-obj-m += mymodule.o
-mymodule-objs := kbdlogger.o
+obj-m += kbdlogger.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

